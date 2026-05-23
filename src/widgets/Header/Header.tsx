@@ -1,0 +1,243 @@
+import { useState, useEffect, useRef } from 'react';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { Search, Heart, ShoppingCart, User, Menu, X, ChevronDown, LogIn, ShoppingBag, LogOut, Sun, Moon, Globe } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { useSelector, useDispatch } from 'react-redux';
+import type { RootState } from '../../shared/store/store';
+import { logout } from '../../shared/store/authSlice';
+
+export const Header = () => {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [activeLang, setActiveLang] = useState(localStorage.getItem('lang') || 'en');
+  const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
+  const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(() => localStorage.getItem('theme') === 'dark');
+
+  const { t, i18n } = useTranslation();
+
+  const langDropdownRef = useRef<HTMLDivElement>(null);
+  const userDropdownRef = useRef<HTMLDivElement>(null);
+
+  const dispatch = useDispatch();
+  const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
+  const cartItemCount = useSelector((state: RootState) =>
+    state.cart.cartItems.reduce((sum, item) => sum + (item.cartQuantity || 0), 0)
+  );
+  const navigate = useNavigate();
+
+  const languages = [
+    { code: 'en', label: 'English', flag: '🇺🇸' },
+    { code: 'tj', label: 'Тоҷикӣ', flag: '🇹🇯' },
+    { code: 'ru', label: 'Русский', flag: '🇷🇺' }
+  ];
+
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+  }, [isDarkMode]);
+
+  const handleLangChange = (code: string) => {
+    setActiveLang(code);
+    localStorage.setItem('lang', code);
+    setIsLangDropdownOpen(false);
+    i18n.changeLanguage(code);
+    window.dispatchEvent(new Event('languageChange'));
+  };
+
+  const handleProtectedAction = (e: React.MouseEvent, path: string) => {
+    e.preventDefault();
+    if (!isAuthenticated) {
+      navigate('/login');
+    } else {
+      navigate(path);
+    }
+  };
+
+  const handleLogout = () => {
+    dispatch(logout());
+    setIsUserDropdownOpen(false);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (langDropdownRef.current && !langDropdownRef.current.contains(e.target as Node)) {
+        setIsLangDropdownOpen(false);
+      }
+      if (userDropdownRef.current && !userDropdownRef.current.contains(e.target as Node)) {
+        setIsUserDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  return (
+    <header className="sticky top-0 z-50 w-full bg-white dark:bg-[#18181B] border-b border-gray-200 dark:border-zinc-800 transition-colors duration-300">
+      <div className="max-w-[1170px] mx-auto px-4 sm:px-6 lg:px-8 py-4 lg:py-3 flex items-center justify-between">
+        
+        <div className="flex items-center gap-4">
+          <button 
+            className="lg:hidden p-1 text-gray-700 dark:text-gray-300 hover:text-[#DB4444] transition-colors"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          >
+            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+          
+          <Link to="/" className="flex items-center">
+            <img src="/images/Logo.png" alt="Fast-Cart Logo" className="dark:invert transition-all" />
+          </Link>
+        </div>
+
+        <nav className="hidden lg:flex items-center gap-6 xl:gap-10 whitespace-nowrap">
+          <NavLink to="/" className={({ isActive }) => `text-[15px] font-medium transition-all duration-300 ${isActive ? 'text-[#DB4444] dark:text-[#DB4444] underline underline-offset-8 decoration-2' : 'text-gray-800 dark:text-gray-200 hover:text-[#DB4444] dark:hover:text-[#DB4444]'}`}>{t('Home')}</NavLink>
+          <NavLink to="/contact" className={({ isActive }) => `text-[15px] font-medium transition-all duration-300 ${isActive ? 'text-[#DB4444] dark:text-[#DB4444] underline underline-offset-8 decoration-2' : 'text-gray-800 dark:text-gray-200 hover:text-[#DB4444] dark:hover:text-[#DB4444]'}`}>{t('Contact')}</NavLink>
+          <NavLink to="/about" className={({ isActive }) => `text-[15px] font-medium transition-all duration-300 ${isActive ? 'text-[#DB4444] dark:text-[#DB4444] underline underline-offset-8 decoration-2' : 'text-gray-800 dark:text-gray-200 hover:text-[#DB4444] dark:hover:text-[#DB4444]'}`}>{t('About')}</NavLink>
+          <NavLink to="/signup" className={({ isActive }) => `text-[15px] font-medium transition-all duration-300 ${isActive ? 'text-[#DB4444] dark:text-[#DB4444] underline underline-offset-8 decoration-2' : 'text-gray-800 dark:text-gray-200 hover:text-[#DB4444] dark:hover:text-[#DB4444]'}`}>{t('Sign Up')}</NavLink>
+        </nav>
+
+        <div className="flex items-center gap-3 sm:gap-5">
+          <div className="hidden lg:flex relative items-center bg-[#F5F5F5] dark:bg-zinc-800/50 rounded-full px-4 py-2.5 w-64 text-sm transition-colors border border-transparent dark:border-zinc-700/50 focus-within:border-[#DB4444]/30">
+            <input 
+              type="text" 
+              placeholder={t('What are you looking for?')}
+              className="bg-transparent outline-none w-full text-gray-800 dark:text-zinc-100 placeholder:text-gray-500 dark:placeholder:text-zinc-400"
+            />
+            <Search size={18} className="text-gray-500 dark:text-zinc-400 cursor-pointer hover:text-[#DB4444] transition-colors" />
+          </div>
+
+          <div className="flex items-center gap-2 sm:gap-4">
+            
+            {/* Dark Mode Toggle */}
+            <button
+              onClick={() => setIsDarkMode(!isDarkMode)}
+              className="p-2 rounded-full text-gray-600 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
+              aria-label="Toggle Dark Mode"
+            >
+              {isDarkMode ? <Sun size={20} className="text-yellow-400" /> : <Moon size={20} />}
+            </button>
+
+            {/* Language Selector */}
+            <div className="relative" ref={langDropdownRef}>
+              <button 
+                onClick={() => setIsLangDropdownOpen(!isLangDropdownOpen)}
+                className="flex items-center gap-1.5 p-2 text-sm font-medium text-gray-700 dark:text-zinc-200 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-full transition-colors"
+              >
+                <Globe size={18} />
+                <span className="hidden sm:inline-block uppercase tracking-wide text-xs">{activeLang}</span>
+                <ChevronDown size={14} className={`transition-transform duration-200 ${isLangDropdownOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {isLangDropdownOpen && (
+                <div className="absolute right-0 mt-3 w-36 bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 shadow-xl rounded-xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                  <div className="py-1">
+                    {languages.map((lang) => (
+                      <button
+                        key={lang.code}
+                        className={`flex items-center gap-3 w-full text-left px-4 py-2.5 text-sm transition-colors ${activeLang === lang.code ? 'bg-[#DB4444]/10 text-[#DB4444] dark:text-[#DB4444] font-semibold' : 'text-gray-700 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-800'}`}
+                        onClick={() => handleLangChange(lang.code)}
+                      >
+                        <span className="text-lg">{lang.flag}</span>
+                        {lang.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Actions */}
+            <Link to="/wishlist" onClick={(e) => handleProtectedAction(e, '/wishlist')} className="p-2 rounded-full text-gray-800 dark:text-zinc-200 hover:text-[#DB4444] dark:hover:text-[#DB4444] transition-colors">
+              <Heart size={22} />
+            </Link>
+            
+            <Link to="/cart" onClick={(e) => handleProtectedAction(e, '/cart')} className="relative p-2 rounded-full text-gray-800 dark:text-zinc-200 hover:text-[#DB4444] dark:hover:text-[#DB4444] transition-colors">
+              <ShoppingCart size={22} />
+              {isAuthenticated && cartItemCount > 0 && (
+                <span className="absolute top-0 right-0 bg-[#DB4444] text-white text-[10px] font-bold w-4.5 h-4.5 flex items-center justify-center rounded-full border-2 border-white dark:border-[#18181B]">
+                  {cartItemCount > 9 ? '9+' : cartItemCount}
+                </span>
+              )}
+            </Link>
+            
+            {isAuthenticated ? (
+              <div className="relative" ref={userDropdownRef}>
+                <button 
+                  onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
+                  className={`flex items-center justify-center p-2 rounded-full transition-all ${isUserDropdownOpen ? 'bg-[#DB4444] text-white shadow-md shadow-red-500/20' : 'text-gray-800 dark:text-zinc-200 hover:bg-gray-100 dark:hover:bg-zinc-800'}`}
+                >
+                  <User size={22} />
+                </button>
+
+                {isUserDropdownOpen && (
+                  <div className="absolute right-0 mt-3 w-56 bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 shadow-2xl rounded-xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                    <div className="p-2">
+                      <Link to="/account" onClick={() => setIsUserDropdownOpen(false)} className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-700 dark:text-zinc-200 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors">
+                        <User size={18} className="text-gray-400 dark:text-zinc-400" /> <span className="text-sm font-medium">{t('My Account')}</span>
+                      </Link>
+                      <Link to="/orders" onClick={() => setIsUserDropdownOpen(false)} className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-700 dark:text-zinc-200 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors">
+                        <ShoppingBag size={18} className="text-gray-400 dark:text-zinc-400" /> <span className="text-sm font-medium">{t('My Orders')}</span>
+                      </Link>
+                      <Link to="/wishlist" onClick={() => setIsUserDropdownOpen(false)} className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-700 dark:text-zinc-200 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors">
+                        <Heart size={18} className="text-gray-400 dark:text-zinc-400" /> <span className="text-sm font-medium">{t('Wishlist')}</span>
+                      </Link>
+                      <div className="h-px bg-gray-100 dark:bg-zinc-800 my-1"></div>
+                      <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors text-left">
+                        <LogOut size={18} /> <span className="text-sm font-medium">{t('Logout')}</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Link to="/login" className="p-2 rounded-full text-gray-800 dark:text-zinc-200 hover:text-[#DB4444] dark:hover:text-[#DB4444] transition-colors">
+                <LogIn size={22} />
+              </Link>
+            )}
+
+          </div>
+        </div>
+      </div>
+
+      {isMobileMenuOpen && (
+        <div className="lg:hidden bg-white dark:bg-[#18181B] border-t border-gray-200 dark:border-zinc-800 animate-in slide-in-from-top-2 duration-300">
+          <nav className="flex flex-col px-4 py-6 space-y-5">
+            <div className="flex relative items-center bg-[#F5F5F5] dark:bg-zinc-800/50 rounded-full px-4 py-3 w-full text-sm border border-transparent dark:border-zinc-700/50">
+              <input 
+                type="text" 
+                placeholder={t('What are you looking for?')}
+                className="bg-transparent outline-none w-full text-gray-800 dark:text-zinc-100 placeholder:text-gray-500 dark:placeholder:text-zinc-400"
+              />
+              <Search size={18} className="text-gray-500 dark:text-zinc-400" />
+            </div>
+            
+            <div className="flex flex-col gap-4 px-2">
+              <NavLink to="/" onClick={() => setIsMobileMenuOpen(false)} className={({ isActive }) => `text-lg font-medium transition-all duration-300 ${isActive ? 'text-[#DB4444] dark:text-[#DB4444] underline underline-offset-8 decoration-2 w-fit' : 'text-gray-800 dark:text-gray-200'}`}>{t('Home')}</NavLink>
+              <NavLink to="/contact" onClick={() => setIsMobileMenuOpen(false)} className={({ isActive }) => `text-lg font-medium transition-all duration-300 ${isActive ? 'text-[#DB4444] dark:text-[#DB4444] underline underline-offset-8 decoration-2 w-fit' : 'text-gray-800 dark:text-gray-200'}`}>{t('Contact')}</NavLink>
+              <NavLink to="/about" onClick={() => setIsMobileMenuOpen(false)} className={({ isActive }) => `text-lg font-medium transition-all duration-300 ${isActive ? 'text-[#DB4444] dark:text-[#DB4444] underline underline-offset-8 decoration-2 w-fit' : 'text-gray-800 dark:text-gray-200'}`}>{t('About')}</NavLink>
+              <NavLink to="/signup" onClick={() => setIsMobileMenuOpen(false)} className={({ isActive }) => `text-lg font-medium transition-all duration-300 ${isActive ? 'text-[#DB4444] dark:text-[#DB4444] underline underline-offset-8 decoration-2 w-fit' : 'text-gray-800 dark:text-gray-200'}`}>{t('Sign Up')}</NavLink>
+            </div>
+            
+            <div className="h-px bg-gray-100 dark:bg-neutral-800 my-2"></div>
+            
+            <div className="px-2">
+              {isAuthenticated ? (
+                <button onClick={handleLogout} className="text-lg font-medium flex items-center gap-3 text-red-500">
+                  <LogOut size={20} /> {t('Logout')}
+                </button>
+              ) : (
+                <Link to="/login" className="text-lg font-medium flex items-center gap-3 text-gray-800 dark:text-gray-200">
+                  <LogIn size={20} /> {t('Log In')}
+                </Link>
+              )}
+            </div>
+          </nav>
+        </div>
+      )}
+    </header>
+  );
+};
