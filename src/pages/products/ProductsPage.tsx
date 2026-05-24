@@ -36,7 +36,7 @@ export const ProductsPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { t } = useTranslation();
 
-  // Filters State
+  // Состояния для фильтров (категории, бренды, рейтинг, цена)
   const initialCategoryId = searchParams.get('category') ? Number(searchParams.get('category')) : null;
   const [selectedCategory, setSelectedCategory] = useState<number | null>(initialCategoryId);
   const [selectedBrands, setSelectedBrands] = useState<number[]>([]);
@@ -47,7 +47,11 @@ export const ProductsPage = () => {
   const [appliedMaxPrice, setAppliedMaxPrice] = useState<number | null>(null);
   const [sortBy, setSortBy] = useState<string>('popularity');
 
-  // Sync state with URL params
+  // Фиксированные пределы цен (1 - 9999)
+  const MIN_PRICE = 1;
+  const MAX_PRICE = 9999;
+
+  // Синхронизация состояния с параметрами URL при загрузке и изменении URL
   useEffect(() => {
     const category = searchParams.get('category') ? Number(searchParams.get('category')) : null;
     const urlMinPrice = searchParams.get('minPrice');
@@ -57,10 +61,17 @@ export const ProductsPage = () => {
     if (urlMinPrice) {
       setMinPrice(urlMinPrice);
       setAppliedMinPrice(Number(urlMinPrice));
+    } else {
+      setMinPrice('');
+      setAppliedMinPrice(null);
     }
+    
     if (urlMaxPrice) {
       setMaxPrice(urlMaxPrice);
       setAppliedMaxPrice(Number(urlMaxPrice));
+    } else {
+      setMaxPrice('');
+      setAppliedMaxPrice(null);
     }
   }, [searchParams]);
 
@@ -69,6 +80,10 @@ export const ProductsPage = () => {
   const [isBrandsOpen, setIsBrandsOpen] = useState(true);
   const [isPriceOpen, setIsPriceOpen] = useState(true);
   const [isRatingOpen, setIsRatingOpen] = useState(true);
+
+  // "See all" states
+  const [showAllCategories, setShowAllCategories] = useState(false);
+  const [showAllBrands, setShowAllBrands] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -101,16 +116,19 @@ export const ProductsPage = () => {
     fetchData();
   }, []);
 
-  // Update URL and local state when category changes
+  // Обработчик выбора категории и обновление URL
   const handleCategoryClick = (id: number | null) => {
     setSelectedCategory(id);
+    const newParams = new URLSearchParams(searchParams);
     if (id) {
-      setSearchParams({ category: id.toString() });
+      newParams.set('category', id.toString());
     } else {
-      setSearchParams({});
+      newParams.delete('category');
     }
+    setSearchParams(newParams);
   };
 
+  // Переключение выбранных брендов
   const handleBrandToggle = (id: number) => {
     setSelectedBrands(prev => 
       prev.includes(id) ? prev.filter(bId => bId !== id) : [...prev, id]
@@ -123,12 +141,30 @@ export const ProductsPage = () => {
     );
   };
 
+  // Применение фильтра по цене и обновление URL
   const handleApplyPrice = () => {
+    const newParams = new URLSearchParams(searchParams);
+    
+    if (minPrice) {
+      newParams.set('minPrice', minPrice);
+    } else {
+      newParams.delete('minPrice');
+    }
+    
+    if (maxPrice) {
+      newParams.set('maxPrice', maxPrice);
+    } else {
+      newParams.delete('maxPrice');
+    }
+    
+    setSearchParams(newParams);
+    
     setAppliedMinPrice(minPrice ? Number(minPrice) : null);
     setAppliedMaxPrice(maxPrice ? Number(maxPrice) : null);
   };
 
-  // Filter and Sort Logic
+  // Основная логика фильтрации и сортировки товаров
+
   const filteredProducts = useMemo(() => {
     let result = [...products];
 
@@ -232,7 +268,7 @@ export const ProductsPage = () => {
                     {t('All products')}
                   </button>
                 </li>
-                {categories.slice(0, 6).map(cat => (
+                {(showAllCategories ? categories : categories.slice(0, 5)).map(cat => (
                   <li key={cat.id}>
                     <button 
                       onClick={() => handleCategoryClick(cat.id)}
@@ -242,9 +278,24 @@ export const ProductsPage = () => {
                     </button>
                   </li>
                 ))}
-                {categories.length > 6 && (
+                {categories.length > 5 && !showAllCategories && (
                   <li>
-                    <button className="text-sm text-[#DB4444] hover:underline mt-2">{t('See all')}</button>
+                    <button 
+                      onClick={() => setShowAllCategories(true)}
+                      className="text-sm text-[#DB4444] hover:underline mt-2"
+                    >
+                      {t('See all')} ({categories.length - 5})
+                    </button>
+                  </li>
+                )}
+                {categories.length > 5 && showAllCategories && (
+                  <li>
+                    <button 
+                      onClick={() => setShowAllCategories(false)}
+                      className="text-sm text-[#DB4444] hover:underline mt-2"
+                    >
+                      {t('See less')}
+                    </button>
                   </li>
                 )}
               </ul>
@@ -262,7 +313,7 @@ export const ProductsPage = () => {
             </button>
             {isBrandsOpen && (
               <ul className="space-y-3 pl-1">
-                {brands.slice(0, 6).map(brand => (
+                {(showAllBrands ? brands : brands.slice(0, 5)).map(brand => (
                   <li key={brand.id} className="flex items-center gap-3">
                     <input 
                       type="checkbox" 
@@ -276,9 +327,24 @@ export const ProductsPage = () => {
                     </label>
                   </li>
                 ))}
-                {brands.length > 6 && (
+                {brands.length > 5 && !showAllBrands && (
                   <li>
-                    <button className="text-sm text-[#DB4444] hover:underline mt-2">{t('See all')}</button>
+                    <button 
+                      onClick={() => setShowAllBrands(true)}
+                      className="text-sm text-[#DB4444] hover:underline mt-2"
+                    >
+                      {t('See all')} ({brands.length - 5})
+                    </button>
+                  </li>
+                )}
+                {brands.length > 5 && showAllBrands && (
+                  <li>
+                    <button 
+                      onClick={() => setShowAllBrands(false)}
+                      className="text-sm text-[#DB4444] hover:underline mt-2"
+                    >
+                      {t('See less')}
+                    </button>
                   </li>
                 )}
               </ul>
@@ -296,10 +362,44 @@ export const ProductsPage = () => {
             </button>
             {isPriceOpen && (
               <div className="pl-1">
-                <div className="relative w-full h-1 bg-gray-200 dark:bg-zinc-700 rounded mb-6 mt-4">
-                  <div className="absolute h-full bg-[#DB4444] rounded" style={{ left: '20%', right: '20%' }}></div>
-                  <div className="absolute w-3 h-3 bg-white border-2 border-[#DB4444] rounded-full top-1/2 -translate-y-1/2" style={{ left: '20%' }}></div>
-                  <div className="absolute w-3 h-3 bg-white border-2 border-[#DB4444] rounded-full top-1/2 -translate-y-1/2" style={{ left: '80%' }}></div>
+                <div className="relative w-full h-8 mb-4 mt-2">
+                  {/* Фоновая линия слайдера */}
+                  <div className="absolute w-full h-1 bg-gray-200 dark:bg-zinc-700 rounded top-3.5"></div>
+                  {/* Активная (красная) линия между ползунками */}
+                  <div 
+                    className="absolute h-1 bg-[#DB4444] rounded top-3.5" 
+                    style={{ 
+                      left: `${((Number(minPrice || MIN_PRICE) - MIN_PRICE) / (MAX_PRICE - MIN_PRICE)) * 100}%`, 
+                      right: `${100 - (((Number(maxPrice) || MAX_PRICE) - MIN_PRICE) / (MAX_PRICE - MIN_PRICE)) * 100}%` 
+                    }}
+                  ></div>
+                  
+                  {/* Ползунок минимальной цены */}
+                  <input 
+                    type="range"
+                    min={MIN_PRICE}
+                    max={MAX_PRICE}
+                    step="1"
+                    value={minPrice || MIN_PRICE}
+                    onChange={(e) => {
+                      const val = Math.min(Number(e.target.value), Number(maxPrice || MAX_PRICE) - 1);
+                      setMinPrice(val.toString());
+                    }}
+                    className="absolute w-full top-2 appearance-none bg-transparent pointer-events-none [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-[#DB4444] [&::-webkit-slider-thumb]:rounded-full [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-[#DB4444] [&::-moz-range-thumb]:rounded-full z-10"
+                  />
+                  {/* Ползунок максимальной цены */}
+                  <input 
+                    type="range"
+                    min={MIN_PRICE}
+                    max={MAX_PRICE}
+                    step="1"
+                    value={maxPrice || MAX_PRICE}
+                    onChange={(e) => {
+                      const val = Math.max(Number(e.target.value), Number(minPrice || MIN_PRICE) + 1);
+                      setMaxPrice(val.toString());
+                    }}
+                    className="absolute w-full top-2 appearance-none bg-transparent pointer-events-none [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-[#DB4444] [&::-webkit-slider-thumb]:rounded-full [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-[#DB4444] [&::-moz-range-thumb]:rounded-full z-20"
+                  />
                 </div>
                 <div className="flex items-center gap-2 mb-4">
                   <div className="flex-1">
@@ -308,7 +408,7 @@ export const ProductsPage = () => {
                       type="number" 
                       value={minPrice}
                       onChange={(e) => setMinPrice(e.target.value)}
-                      placeholder="0"
+                      placeholder="1"
                       className="w-full border border-gray-300 dark:border-zinc-700 bg-transparent text-sm rounded px-3 py-1.5 focus:outline-none focus:border-[#DB4444] dark:text-zinc-200"
                     />
                   </div>
@@ -318,7 +418,7 @@ export const ProductsPage = () => {
                       type="number" 
                       value={maxPrice}
                       onChange={(e) => setMaxPrice(e.target.value)}
-                      placeholder="99999"
+                      placeholder="9999"
                       className="w-full border border-gray-300 dark:border-zinc-700 bg-transparent text-sm rounded px-3 py-1.5 focus:outline-none focus:border-[#DB4444] dark:text-zinc-200"
                     />
                   </div>

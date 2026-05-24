@@ -15,8 +15,8 @@ const IMAGE_BASE_URL = `${import.meta.env.VITE_API_BASE_URL}/images/`;
   Если это просто имя файла — склеиваем с IMAGE_BASE_URL.
 */
 const buildImageUrl = (image: string): string => {
-  if (!image) return '/images/placeholder.avif';
-  if (image.startsWith('http')) return image;
+  if (!image || image.trim() === '') return 'https://placehold.co/400x400/EAEAEA/999999?text=No+Image';
+  if (image.startsWith('http') || image.startsWith('data:')) return image;
   return `${IMAGE_BASE_URL}${image}`;
 };
 
@@ -124,7 +124,7 @@ export const ProductCard = ({ product, hideDiscountBadge = false }: ProductCardP
           onError={(e) => { 
             if (e.currentTarget.getAttribute('data-failed')) return;
             e.currentTarget.setAttribute('data-failed', 'true');
-            e.currentTarget.src = '/images/placeholder.avif'; 
+            e.currentTarget.src = 'https://placehold.co/400x400/EAEAEA/999999?text=No+Image'; 
           }}
           className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
         />

@@ -3,6 +3,7 @@ import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { Search, Heart, ShoppingCart, User, Menu, X, ChevronDown, LogIn, ShoppingBag, LogOut, Sun, Moon, Globe } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useSelector, useDispatch } from 'react-redux';
+import axios from 'axios';
 import type { RootState } from '../../shared/store/store';
 import { logout } from '../../shared/store/authSlice';
 
@@ -12,6 +13,15 @@ export const Header = () => {
   const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(() => localStorage.getItem('theme') === 'dark');
+
+  // Search state
+  const [products, setProducts] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [isMobileSearchFocused, setIsMobileSearchFocused] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
+  const mobileSearchRef = useRef<HTMLDivElement>(null);
 
   const { t, i18n } = useTranslation();
 
@@ -40,6 +50,27 @@ export const Header = () => {
       localStorage.setItem('theme', 'light');
     }
   }, [isDarkMode]);
+
+  // Fetch products and categories for search autocomplete
+  useEffect(() => {
+    const fetchSearchData = async () => {
+      try {
+        const [prodRes, catRes] = await Promise.all([
+          axios.get(`${import.meta.env.VITE_API_BASE_URL}/Product/get-products`),
+          axios.get(`${import.meta.env.VITE_API_BASE_URL}/Category/get-categories`)
+        ]);
+        if (prodRes.data?.data?.products) {
+          setProducts(prodRes.data.data.products);
+        }
+        if (catRes.data?.data) {
+          setCategories(catRes.data.data);
+        }
+      } catch (error) {
+        console.error('Failed to load search data:', error);
+      }
+    };
+    fetchSearchData();
+  }, []);
 
   const handleLangChange = (code: string) => {
     setActiveLang(code);
@@ -71,10 +102,20 @@ export const Header = () => {
       if (userDropdownRef.current && !userDropdownRef.current.contains(e.target as Node)) {
         setIsUserDropdownOpen(false);
       }
+      if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
+        setIsSearchFocused(false);
+      }
+      if (mobileSearchRef.current && !mobileSearchRef.current.contains(e.target as Node)) {
+        setIsMobileSearchFocused(false);
+      }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  const filteredProducts = products.filter(p => p.productName.toLowerCase().includes(searchQuery.toLowerCase())).slice(0, 6);
+  const filteredCategories = categories.filter(c => c.categoryName.toLowerCase().includes(searchQuery.toLowerCase())).slice(0, 3);
+  const hasSearchResults = filteredProducts.length > 0 || filteredCategories.length > 0;
 
   return (
     <header className="sticky top-0 z-50 w-full bg-white dark:bg-[#18181B] border-b border-gray-200 dark:border-zinc-800 transition-colors duration-300">
@@ -101,13 +142,63 @@ export const Header = () => {
         </nav>
 
         <div className="flex items-center gap-3 sm:gap-5">
-          <div className="hidden lg:flex relative items-center bg-[#F5F5F5] dark:bg-zinc-800/50 rounded-full px-4 py-2.5 w-64 text-sm transition-colors border border-transparent dark:border-zinc-700/50 focus-within:border-[#DB4444]/30">
+          <div ref={searchRef} className="hidden lg:flex relative items-center bg-[#F5F5F5] dark:bg-zinc-800/50 rounded-full px-4 py-2.5 w-64 text-sm transition-colors border border-transparent dark:border-zinc-700/50 focus-within:border-[#DB4444]/30">
             <input 
               type="text" 
               placeholder={t('What are you looking for?')}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onFocus={() => setIsSearchFocused(true)}
               className="bg-transparent outline-none w-full text-gray-800 dark:text-zinc-100 placeholder:text-gray-500 dark:placeholder:text-zinc-400"
             />
             <Search size={18} className="text-gray-500 dark:text-zinc-400 cursor-pointer hover:text-[#DB4444] transition-colors" />
+            
+            {/* Search Dropdown Desktop */}
+            {isSearchFocused && searchQuery && (
+              <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-xl shadow-xl z-50 overflow-hidden max-h-[400px] overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-200">
+                {hasSearchResults ? (
+                  <ul className="py-2">
+                    {filteredCategories.map(category => (
+                      <li key={`cat-${category.id}`}>
+                        <button 
+                          onMouseDown={() => {
+                            navigate(`/products?category=${category.id}`);
+                            setSearchQuery('');
+                            setIsSearchFocused(false);
+                          }}
+                          className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors text-left"
+                        >
+                          <div className="flex items-center gap-3">
+                            <Search size={16} className="text-[#DB4444] shrink-0" />
+                            <span className="text-sm font-medium text-gray-800 dark:text-zinc-200 line-clamp-1">{category.categoryName}</span>
+                          </div>
+                          <span className="text-[10px] uppercase tracking-wider text-gray-400 dark:text-zinc-500 bg-gray-100 dark:bg-zinc-800 px-2 py-0.5 rounded">{t('Category', 'Category')}</span>
+                        </button>
+                      </li>
+                    ))}
+                    {filteredProducts.map(product => (
+                      <li key={`prod-${product.id}`}>
+                        <button 
+                          onMouseDown={() => {
+                            navigate(`/product/${product.id}`);
+                            setSearchQuery('');
+                            setIsSearchFocused(false);
+                          }}
+                          className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors text-left"
+                        >
+                          <Search size={16} className="text-gray-400 shrink-0" />
+                          <span className="text-sm font-medium text-gray-800 dark:text-zinc-200 line-clamp-1">{product.productName}</span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <div className="px-4 py-4 text-sm text-gray-500 dark:text-zinc-400 text-center">
+                    No results found
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="flex items-center gap-2 sm:gap-4">
@@ -206,13 +297,67 @@ export const Header = () => {
       {isMobileMenuOpen && (
         <div className="lg:hidden bg-white dark:bg-[#18181B] border-t border-gray-200 dark:border-zinc-800 animate-in slide-in-from-top-2 duration-300">
           <nav className="flex flex-col px-4 py-6 space-y-5">
-            <div className="flex relative items-center bg-[#F5F5F5] dark:bg-zinc-800/50 rounded-full px-4 py-3 w-full text-sm border border-transparent dark:border-zinc-700/50">
-              <input 
-                type="text" 
-                placeholder={t('What are you looking for?')}
-                className="bg-transparent outline-none w-full text-gray-800 dark:text-zinc-100 placeholder:text-gray-500 dark:placeholder:text-zinc-400"
-              />
-              <Search size={18} className="text-gray-500 dark:text-zinc-400" />
+            <div ref={mobileSearchRef} className="flex relative flex-col w-full z-50">
+              <div className="flex relative items-center bg-[#F5F5F5] dark:bg-zinc-800/50 rounded-full px-4 py-3 w-full text-sm border border-transparent dark:border-zinc-700/50 focus-within:border-[#DB4444]/30">
+                <input 
+                  type="text" 
+                  placeholder={t('What are you looking for?')}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onFocus={() => setIsMobileSearchFocused(true)}
+                  className="bg-transparent outline-none w-full text-gray-800 dark:text-zinc-100 placeholder:text-gray-500 dark:placeholder:text-zinc-400"
+                />
+                <Search size={18} className="text-gray-500 dark:text-zinc-400" />
+              </div>
+
+              {/* Search Dropdown Mobile */}
+              {isMobileSearchFocused && searchQuery && (
+                <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-xl shadow-xl overflow-hidden max-h-[300px] overflow-y-auto animate-in fade-in duration-200">
+                  {hasSearchResults ? (
+                    <ul className="py-2">
+                      {filteredCategories.map(category => (
+                        <li key={`cat-${category.id}`}>
+                          <button 
+                            onMouseDown={() => {
+                              navigate(`/products?category=${category.id}`);
+                              setSearchQuery('');
+                              setIsMobileSearchFocused(false);
+                              setIsMobileMenuOpen(false);
+                            }}
+                            className="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors text-left"
+                          >
+                            <div className="flex items-center gap-3">
+                              <Search size={16} className="text-[#DB4444] shrink-0" />
+                              <span className="text-sm font-medium text-gray-800 dark:text-zinc-200 line-clamp-1">{category.categoryName}</span>
+                            </div>
+                            <span className="text-[10px] uppercase tracking-wider text-gray-400 dark:text-zinc-500 bg-gray-100 dark:bg-zinc-800 px-2 py-0.5 rounded">{t('Category', 'Category')}</span>
+                          </button>
+                        </li>
+                      ))}
+                      {filteredProducts.map(product => (
+                        <li key={`prod-${product.id}`}>
+                          <button 
+                            onMouseDown={() => {
+                              navigate(`/product/${product.id}`);
+                              setSearchQuery('');
+                              setIsMobileSearchFocused(false);
+                              setIsMobileMenuOpen(false);
+                            }}
+                            className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors text-left"
+                          >
+                            <Search size={16} className="text-gray-400 shrink-0" />
+                            <span className="text-sm font-medium text-gray-800 dark:text-zinc-200 line-clamp-1">{product.productName}</span>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <div className="px-4 py-4 text-sm text-gray-500 dark:text-zinc-400 text-center">
+                      No results found
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
             
             <div className="flex flex-col gap-4 px-2">
