@@ -66,7 +66,7 @@ export const Footer = () => {
       <div className="max-w-[1170px] mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Основная сетка футера */}
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-8 lg:gap-10 mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-10 md:gap-8 lg:gap-10 mb-12 lg:mb-16">
           
           {/* Колонка 1: Подписка / Логотип */}
           <div className="space-y-4">
@@ -106,8 +106,8 @@ export const Footer = () => {
           </div>
 
           {/* Колонка 3: Аккаунт */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium mb-6">Account</h3>
+          <div className="space-y-3 lg:space-y-4">
+            <h3 className="text-lg font-medium mb-4 lg:mb-6">Account</h3>
             <ul className="space-y-3">
               <li><Link to="/account" className="text-sm text-gray-300 hover:text-white transition-colors">My Account</Link></li>
               <li><Link to="/login" className="text-sm text-gray-300 hover:text-white transition-colors">Login / Register</Link></li>
@@ -118,8 +118,8 @@ export const Footer = () => {
           </div>
 
           {/* Колонка 4: Быстрые ссылки */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium mb-6">Quick Link</h3>
+          <div className="space-y-3 lg:space-y-4">
+            <h3 className="text-lg font-medium mb-4 lg:mb-6">Quick Link</h3>
             <ul className="space-y-3">
               <li><Link to="/privacy" className="text-sm text-gray-300 hover:text-white transition-colors">Privacy Policy</Link></li>
               <li><Link to="/terms" className="text-sm text-gray-300 hover:text-white transition-colors">Terms Of Use</Link></li>
@@ -150,9 +150,9 @@ export const Footer = () => {
         </div>
 
         {/* Копирайт */}
-        <div className="border-t border-gray-800 pt-8 mt-12 flex flex-col items-center justify-center gap-3">
-          <p className="text-gray-500 text-sm flex items-center gap-1">
-            <span className="text-lg">&copy;</span> Copyright FastCart {new Date().getFullYear()}. All right reserved
+        <div className="border-t border-gray-800/80 pt-6 mt-8 flex flex-col items-center justify-center gap-2">
+          <p className="text-gray-500 text-xs sm:text-sm flex items-center gap-1">
+            <span className="text-base sm:text-lg">&copy;</span> Copyright FastCart {new Date().getFullYear()}. All right reserved
           </p>
           <p className="text-gray-400 text-sm font-medium">
             Designed & Developed by{' '}

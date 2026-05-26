@@ -123,13 +123,14 @@ export const Header = () => {
         
         <div className="flex items-center gap-4">
           <button 
-            className="lg:hidden p-1 text-gray-700 dark:text-gray-300 hover:text-[#DB4444] transition-colors"
+            className="lg:hidden p-2 -ml-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-zinc-800 hover:text-[#DB4444] transition-colors"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            aria-label="Toggle Menu"
           >
-            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            {isMobileMenuOpen ? <X size={26} /> : <Menu size={26} />}
           </button>
           
-          <Link to="/" className="flex items-center">
+          <Link to="/" className="flex items-center" onClick={() => setIsMobileMenuOpen(false)}>
             <img src="/images/Logo.png" alt="Fast-Cart Logo" className="dark:invert transition-all" />
           </Link>
         </div>
@@ -206,14 +207,14 @@ export const Header = () => {
             {/* Dark Mode Toggle */}
             <button
               onClick={() => setIsDarkMode(!isDarkMode)}
-              className="p-2 rounded-full text-gray-600 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
+              className="hidden lg:flex p-2 rounded-full text-gray-600 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
               aria-label="Toggle Dark Mode"
             >
               {isDarkMode ? <Sun size={20} className="text-yellow-400" /> : <Moon size={20} />}
             </button>
 
             {/* Language Selector */}
-            <div className="relative" ref={langDropdownRef}>
+            <div className="hidden lg:block relative" ref={langDropdownRef}>
               <button 
                 onClick={() => setIsLangDropdownOpen(!isLangDropdownOpen)}
                 className="flex items-center gap-1.5 p-2 text-sm font-medium text-gray-700 dark:text-zinc-200 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-full transition-colors"
@@ -242,11 +243,11 @@ export const Header = () => {
             </div>
 
             {/* Actions */}
-            <Link to="/wishlist" onClick={(e) => handleProtectedAction(e, '/wishlist')} className="p-2 rounded-full text-gray-800 dark:text-zinc-200 hover:text-[#DB4444] dark:hover:text-[#DB4444] transition-colors">
+            <Link to="/wishlist" onClick={(e) => handleProtectedAction(e, '/wishlist')} className="hidden lg:flex p-2 rounded-full text-gray-800 dark:text-zinc-200 hover:text-[#DB4444] dark:hover:text-[#DB4444] transition-colors">
               <Heart size={22} />
             </Link>
             
-            <Link to="/cart" onClick={(e) => handleProtectedAction(e, '/cart')} className="relative p-2 rounded-full text-gray-800 dark:text-zinc-200 hover:text-[#DB4444] dark:hover:text-[#DB4444] transition-colors">
+            <Link to="/cart" onClick={(e) => handleProtectedAction(e, '/cart')} className="hidden lg:flex relative p-2 rounded-full text-gray-800 dark:text-zinc-200 hover:text-[#DB4444] dark:hover:text-[#DB4444] transition-colors">
               <ShoppingCart size={22} />
               {isAuthenticated && cartItemCount > 0 && (
                 <span className="absolute top-0 right-0 bg-[#DB4444] text-white text-[10px] font-bold w-4.5 h-4.5 flex items-center justify-center rounded-full border-2 border-white dark:border-[#18181B]">
@@ -295,24 +296,24 @@ export const Header = () => {
       </div>
 
       {isMobileMenuOpen && (
-        <div className="lg:hidden bg-white dark:bg-[#18181B] border-t border-gray-200 dark:border-zinc-800 animate-in slide-in-from-top-2 duration-300">
-          <nav className="flex flex-col px-4 py-6 space-y-5">
+        <div className="lg:hidden fixed left-0 right-0 top-[73px] bottom-0 z-40 bg-white/95 dark:bg-[#18181B]/95 backdrop-blur-xl border-t border-gray-200/50 dark:border-zinc-800/50 overflow-y-auto animate-in slide-in-from-top-4 fade-in duration-300">
+          <nav className="flex flex-col px-6 py-8 space-y-8 min-h-full">
             <div ref={mobileSearchRef} className="flex relative flex-col w-full z-50">
-              <div className="flex relative items-center bg-[#F5F5F5] dark:bg-zinc-800/50 rounded-full px-4 py-3 w-full text-sm border border-transparent dark:border-zinc-700/50 focus-within:border-[#DB4444]/30">
+              <div className="flex relative items-center bg-gray-100/80 dark:bg-zinc-800/80 backdrop-blur-sm rounded-2xl px-5 py-3.5 w-full text-base border border-transparent dark:border-zinc-700/50 focus-within:border-[#DB4444]/50 focus-within:bg-white dark:focus-within:bg-zinc-900 transition-all shadow-inner">
                 <input 
                   type="text" 
                   placeholder={t('What are you looking for?')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onFocus={() => setIsMobileSearchFocused(true)}
-                  className="bg-transparent outline-none w-full text-gray-800 dark:text-zinc-100 placeholder:text-gray-500 dark:placeholder:text-zinc-400"
+                  className="bg-transparent outline-none w-full text-gray-900 dark:text-zinc-100 placeholder:text-gray-500 dark:placeholder:text-zinc-400 font-medium"
                 />
-                <Search size={18} className="text-gray-500 dark:text-zinc-400" />
+                <Search size={20} className="text-gray-400 dark:text-zinc-500" />
               </div>
 
               {/* Search Dropdown Mobile */}
               {isMobileSearchFocused && searchQuery && (
-                <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-xl shadow-xl overflow-hidden max-h-[300px] overflow-y-auto animate-in fade-in duration-200">
+                <div className="absolute top-[calc(100%+8px)] left-0 right-0 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-xl border border-gray-100 dark:border-zinc-800 rounded-2xl shadow-2xl overflow-hidden max-h-[60vh] overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-200 z-50">
                   {hasSearchResults ? (
                     <ul className="py-2">
                       {filteredCategories.map(category => (
@@ -324,13 +325,15 @@ export const Header = () => {
                               setIsMobileSearchFocused(false);
                               setIsMobileMenuOpen(false);
                             }}
-                            className="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors text-left"
+                            className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors text-left border-b border-gray-50 dark:border-zinc-800/50 last:border-0"
                           >
                             <div className="flex items-center gap-3">
-                              <Search size={16} className="text-[#DB4444] shrink-0" />
-                              <span className="text-sm font-medium text-gray-800 dark:text-zinc-200 line-clamp-1">{category.categoryName}</span>
+                              <div className="w-8 h-8 rounded-full bg-red-50 dark:bg-red-500/10 flex items-center justify-center shrink-0">
+                                <Search size={14} className="text-[#DB4444]" />
+                              </div>
+                              <span className="text-sm font-semibold text-gray-800 dark:text-zinc-200 line-clamp-1">{category.categoryName}</span>
                             </div>
-                            <span className="text-[10px] uppercase tracking-wider text-gray-400 dark:text-zinc-500 bg-gray-100 dark:bg-zinc-800 px-2 py-0.5 rounded">{t('Category', 'Category')}</span>
+                            <span className="text-[10px] uppercase tracking-wider text-gray-400 dark:text-zinc-500 bg-gray-100 dark:bg-zinc-800 px-2 py-1 rounded-md font-medium">{t('Category', 'Category')}</span>
                           </button>
                         </li>
                       ))}
@@ -343,42 +346,87 @@ export const Header = () => {
                               setIsMobileSearchFocused(false);
                               setIsMobileMenuOpen(false);
                             }}
-                            className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors text-left"
+                            className="w-full flex items-center gap-3 px-5 py-3.5 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors text-left border-b border-gray-50 dark:border-zinc-800/50 last:border-0"
                           >
-                            <Search size={16} className="text-gray-400 shrink-0" />
-                            <span className="text-sm font-medium text-gray-800 dark:text-zinc-200 line-clamp-1">{product.productName}</span>
+                            <div className="w-8 h-8 rounded-full bg-gray-50 dark:bg-zinc-800 flex items-center justify-center shrink-0">
+                              <Search size={14} className="text-gray-400" />
+                            </div>
+                            <span className="text-sm font-medium text-gray-700 dark:text-zinc-300 line-clamp-1">{product.productName}</span>
                           </button>
                         </li>
                       ))}
                     </ul>
                   ) : (
-                    <div className="px-4 py-4 text-sm text-gray-500 dark:text-zinc-400 text-center">
-                      No results found
+                    <div className="px-5 py-8 text-sm text-gray-500 dark:text-zinc-400 text-center flex flex-col items-center gap-2">
+                      <Search size={24} className="text-gray-300 dark:text-zinc-600 mb-1" />
+                      No results found for "{searchQuery}"
                     </div>
                   )}
                 </div>
               )}
             </div>
             
-            <div className="flex flex-col gap-4 px-2">
-              <NavLink to="/" onClick={() => setIsMobileMenuOpen(false)} className={({ isActive }) => `text-lg font-medium transition-all duration-300 ${isActive ? 'text-[#DB4444] dark:text-[#DB4444] underline underline-offset-8 decoration-2 w-fit' : 'text-gray-800 dark:text-gray-200'}`}>{t('Home')}</NavLink>
-              <NavLink to="/contact" onClick={() => setIsMobileMenuOpen(false)} className={({ isActive }) => `text-lg font-medium transition-all duration-300 ${isActive ? 'text-[#DB4444] dark:text-[#DB4444] underline underline-offset-8 decoration-2 w-fit' : 'text-gray-800 dark:text-gray-200'}`}>{t('Contact')}</NavLink>
-              <NavLink to="/about" onClick={() => setIsMobileMenuOpen(false)} className={({ isActive }) => `text-lg font-medium transition-all duration-300 ${isActive ? 'text-[#DB4444] dark:text-[#DB4444] underline underline-offset-8 decoration-2 w-fit' : 'text-gray-800 dark:text-gray-200'}`}>{t('About')}</NavLink>
-              <NavLink to="/signup" onClick={() => setIsMobileMenuOpen(false)} className={({ isActive }) => `text-lg font-medium transition-all duration-300 ${isActive ? 'text-[#DB4444] dark:text-[#DB4444] underline underline-offset-8 decoration-2 w-fit' : 'text-gray-800 dark:text-gray-200'}`}>{t('Sign Up')}</NavLink>
+            <div className="flex flex-col gap-2 px-1">
+              <NavLink to="/" onClick={() => setIsMobileMenuOpen(false)} className={({ isActive }) => `text-xl font-semibold p-3 rounded-xl transition-all duration-300 ${isActive ? 'bg-red-50 dark:bg-red-500/10 text-[#DB4444] dark:text-[#DB4444]' : 'text-gray-800 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-zinc-800/50'}`}>{t('Home')}</NavLink>
+              <NavLink to="/contact" onClick={() => setIsMobileMenuOpen(false)} className={({ isActive }) => `text-xl font-semibold p-3 rounded-xl transition-all duration-300 ${isActive ? 'bg-red-50 dark:bg-red-500/10 text-[#DB4444] dark:text-[#DB4444]' : 'text-gray-800 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-zinc-800/50'}`}>{t('Contact')}</NavLink>
+              <NavLink to="/about" onClick={() => setIsMobileMenuOpen(false)} className={({ isActive }) => `text-xl font-semibold p-3 rounded-xl transition-all duration-300 ${isActive ? 'bg-red-50 dark:bg-red-500/10 text-[#DB4444] dark:text-[#DB4444]' : 'text-gray-800 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-zinc-800/50'}`}>{t('About')}</NavLink>
+              <NavLink to="/signup" onClick={() => setIsMobileMenuOpen(false)} className={({ isActive }) => `text-xl font-semibold p-3 rounded-xl transition-all duration-300 ${isActive ? 'bg-red-50 dark:bg-red-500/10 text-[#DB4444] dark:text-[#DB4444]' : 'text-gray-800 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-zinc-800/50'}`}>{t('Sign Up')}</NavLink>
             </div>
             
-            <div className="h-px bg-gray-100 dark:bg-neutral-800 my-2"></div>
+            <div className="grid grid-cols-2 gap-3 px-1">
+              <Link to="/wishlist" onClick={(e) => { handleProtectedAction(e, '/wishlist'); setIsMobileMenuOpen(false); }} className="flex items-center justify-center gap-3 p-4 rounded-2xl bg-gray-50 dark:bg-zinc-800/50 text-gray-800 dark:text-gray-200 hover:text-[#DB4444] transition-colors">
+                <Heart size={22} />
+                <span className="font-semibold">{t('Wishlist')}</span>
+              </Link>
+              
+              <Link to="/cart" onClick={(e) => { handleProtectedAction(e, '/cart'); setIsMobileMenuOpen(false); }} className="flex items-center justify-center gap-3 p-4 rounded-2xl bg-gray-50 dark:bg-zinc-800/50 text-gray-800 dark:text-gray-200 hover:text-[#DB4444] transition-colors relative">
+                <ShoppingCart size={22} />
+                <span className="font-semibold">{t('Cart')}</span>
+                {isAuthenticated && cartItemCount > 0 && (
+                  <span className="absolute top-2 right-2 bg-[#DB4444] text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full">
+                    {cartItemCount > 9 ? '9+' : cartItemCount}
+                  </span>
+                )}
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 px-1">
+              <button onClick={() => setIsDarkMode(!isDarkMode)} className="flex items-center justify-center gap-3 p-4 rounded-2xl bg-gray-50 dark:bg-zinc-800/50 text-gray-800 dark:text-gray-200 transition-colors">
+                {isDarkMode ? <Sun size={22} className="text-yellow-400" /> : <Moon size={22} />}
+                <span className="font-semibold">{t('Theme')}</span>
+              </button>
+              
+              <div className="relative flex items-center justify-center p-4 rounded-2xl bg-gray-50 dark:bg-zinc-800/50 text-gray-800 dark:text-gray-200">
+                <select 
+                  value={activeLang}
+                  onChange={(e) => handleLangChange(e.target.value)}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                >
+                  {languages.map(lang => (
+                    <option key={lang.code} value={lang.code}>{lang.label}</option>
+                  ))}
+                </select>
+                <div className="flex items-center gap-2 pointer-events-none">
+                  <Globe size={22} />
+                  <span className="font-semibold uppercase">{activeLang}</span>
+                  <ChevronDown size={16} />
+                </div>
+              </div>
+            </div>
             
-            <div className="px-2">
+            <div className="mt-auto pt-8 pb-4">
+              <div className="h-px bg-gradient-to-r from-transparent via-gray-200 dark:via-zinc-700 to-transparent mb-6"></div>
+              <div className="px-1">
               {isAuthenticated ? (
-                <button onClick={handleLogout} className="text-lg font-medium flex items-center gap-3 text-red-500">
-                  <LogOut size={20} /> {t('Logout')}
+                <button onClick={handleLogout} className="w-full p-4 rounded-2xl bg-red-50 dark:bg-red-500/10 text-lg font-semibold flex items-center justify-center gap-3 text-red-500 hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors">
+                  <LogOut size={22} /> {t('Logout')}
                 </button>
               ) : (
-                <Link to="/login" className="text-lg font-medium flex items-center gap-3 text-gray-800 dark:text-gray-200">
-                  <LogIn size={20} /> {t('Log In')}
+                <Link to="/login" onClick={() => setIsMobileMenuOpen(false)} className="w-full p-4 rounded-2xl bg-black dark:bg-white text-white dark:text-black text-lg font-semibold flex items-center justify-center gap-3 hover:bg-gray-900 dark:hover:bg-gray-100 transition-colors shadow-lg shadow-black/10 dark:shadow-white/10">
+                  <LogIn size={22} /> {t('Log In')}
                 </Link>
               )}
+              </div>
             </div>
           </nav>
         </div>

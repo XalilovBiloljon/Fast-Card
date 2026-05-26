@@ -93,16 +93,16 @@ export const HeroSection = () => {
         {error && <div className="text-sm text-red-500 py-2">{error}</div>}
         
         {!isLoading && !error && (
-          <nav className="flex lg:flex-col overflow-x-auto lg:overflow-visible gap-6 lg:gap-4 pb-4 lg:pb-0 scrollbar-hide">
+          <nav className="flex lg:flex-col overflow-x-auto lg:overflow-visible gap-3 lg:gap-4 pb-4 lg:pb-0 scrollbar-hide -mx-4 px-4 lg:mx-0 lg:px-0">
             {categories.slice(0, 9).map((category) => (
               <Link 
                 to={`/products?category=${category.id}`} 
                 key={category.id} 
-                className="flex items-center justify-between text-base whitespace-nowrap lg:whitespace-normal text-gray-800 dark:text-gray-300 hover:text-black dark:hover:text-white hover:font-medium transition-all leading-tight"
+                className="flex items-center justify-between px-5 py-2.5 lg:px-0 lg:py-0 bg-gray-100 lg:bg-transparent dark:bg-zinc-800/80 lg:dark:bg-transparent rounded-full lg:rounded-none text-sm lg:text-base whitespace-nowrap lg:whitespace-normal text-gray-700 dark:text-gray-300 hover:bg-gray-200 lg:hover:bg-transparent dark:hover:bg-zinc-700 lg:dark:hover:bg-transparent lg:hover:text-black lg:dark:hover:text-white font-medium lg:font-normal lg:hover:font-medium transition-all leading-tight border border-transparent dark:border-zinc-700/50 lg:dark:border-transparent"
               >
                 <span>{category.categoryName}</span>
                 {category.subCategories && category.subCategories.length > 0 && (
-                  <ChevronRight size={16} className="hidden lg:block text-gray-800 dark:text-gray-300" />
+                  <ChevronRight size={16} className="hidden lg:block text-gray-800 dark:text-gray-300 ml-2" />
                 )}
               </Link>
             ))}

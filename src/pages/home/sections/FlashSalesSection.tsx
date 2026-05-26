@@ -108,30 +108,30 @@ export const FlashSalesSection = () => {
 
       <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 lg:gap-0 mb-8 w-full">
         <div className="flex flex-col md:flex-row md:items-end gap-6 md:gap-16">
-          <h2 className="text-3xl md:text-4xl font-semibold tracking-wide dark:text-white">{t("Flash Sales")}</h2>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold tracking-wide dark:text-white">{t("Flash Sales")}</h2>
           
-          <div className="flex items-end gap-4">
+          <div className="flex items-end gap-2 sm:gap-4">
             <div className="flex flex-col">
-              <span className="text-xs font-medium mb-1 dark:text-gray-300">{t("Days")}</span>
-              <span className="text-3xl font-bold tracking-widest dark:text-white">{timerData.days}</span>
+              <span className="text-[10px] sm:text-xs font-medium mb-1 dark:text-gray-300">{t("Days")}</span>
+              <span className="text-2xl sm:text-3xl font-bold tracking-widest dark:text-white">{timerData.days}</span>
             </div>
-            <span className="text-3xl font-bold text-[#DB4444] pb-1">:</span>
+            <span className="text-xl sm:text-3xl font-bold text-[#DB4444] pb-1 sm:pb-1">:</span>
             
             <div className="flex flex-col">
-              <span className="text-xs font-medium mb-1 dark:text-gray-300">{t("Hours")}</span>
-              <span className="text-3xl font-bold tracking-widest dark:text-white">{timerData.hours}</span>
+              <span className="text-[10px] sm:text-xs font-medium mb-1 dark:text-gray-300">{t("Hours")}</span>
+              <span className="text-2xl sm:text-3xl font-bold tracking-widest dark:text-white">{timerData.hours}</span>
             </div>
-            <span className="text-3xl font-bold text-[#DB4444] pb-1">:</span>
+            <span className="text-xl sm:text-3xl font-bold text-[#DB4444] pb-1 sm:pb-1">:</span>
             
             <div className="flex flex-col">
-              <span className="text-xs font-medium mb-1 dark:text-gray-300">{t("Minutes")}</span>
-              <span className="text-3xl font-bold tracking-widest dark:text-white">{timerData.minutes}</span>
+              <span className="text-[10px] sm:text-xs font-medium mb-1 dark:text-gray-300">{t("Minutes")}</span>
+              <span className="text-2xl sm:text-3xl font-bold tracking-widest dark:text-white">{timerData.minutes}</span>
             </div>
-            <span className="text-3xl font-bold text-[#DB4444] pb-1">:</span>
+            <span className="text-xl sm:text-3xl font-bold text-[#DB4444] pb-1 sm:pb-1">:</span>
             
             <div className="flex flex-col">
-              <span className="text-xs font-medium mb-1 dark:text-gray-300">{t("Seconds")}</span>
-              <span className="text-3xl font-bold tracking-widest dark:text-white">{timerData.seconds}</span>
+              <span className="text-[10px] sm:text-xs font-medium mb-1 dark:text-gray-300">{t("Seconds")}</span>
+              <span className="text-2xl sm:text-3xl font-bold tracking-widest dark:text-white">{timerData.seconds}</span>
             </div>
           </div>
         </div>
