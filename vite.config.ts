@@ -10,5 +10,8 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  // Trigger restart for Redux installation
+  define: {
+    'import.meta.env.VITE_API_BASE_URL': JSON.stringify('https://fastcard-1-o23z.onrender.com/api'),
+    'import.meta.env.VITE_GEMINI_API_KEY': JSON.stringify('AIzaSyB0pZuZ25X4csUzoXyDK4SrCDtiAjjsngI')
+  }
 });
